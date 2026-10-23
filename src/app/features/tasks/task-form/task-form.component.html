@@ -1,0 +1,89 @@
+<form class="task-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="field">
+    <label for="task-title">Title <span aria-hidden="true">*</span></label>
+    <input
+      id="task-title"
+      type="text"
+      formControlName="title"
+      autocomplete="off"
+      [attr.aria-invalid]="errorMessage('title') ? 'true' : null"
+      [attr.aria-describedby]="errorMessage('title') ? 'task-title-error' : null"
+    />
+    @if (errorMessage('title'); as message) {
+      <p id="task-title-error" class="field-error" role="alert">{{ message }}</p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="task-description">Description</label>
+    <textarea
+      id="task-description"
+      rows="4"
+      formControlName="description"
+      [attr.aria-invalid]="errorMessage('description') ? 'true' : null"
+      [attr.aria-describedby]="errorMessage('description') ? 'task-description-error' : null"
+    ></textarea>
+    @if (errorMessage('description'); as message) {
+      <p id="task-description-error" class="field-error" role="alert">{{ message }}</p>
+    }
+  </div>
+
+  <div class="field-row">
+    <div class="field">
+      <label for="task-status">Status <span aria-hidden="true">*</span></label>
+      <select
+        id="task-status"
+        formControlName="status"
+        [attr.aria-invalid]="errorMessage('status') ? 'true' : null"
+        [attr.aria-describedby]="errorMessage('status') ? 'task-status-error' : null"
+      >
+        <option value="">Select a status</option>
+        @for (option of statuses; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+      @if (errorMessage('status'); as message) {
+        <p id="task-status-error" class="field-error" role="alert">{{ message }}</p>
+      }
+    </div>
+
+    <div class="field">
+      <label for="task-priority">Priority <span aria-hidden="true">*</span></label>
+      <select
+        id="task-priority"
+        formControlName="priority"
+        [attr.aria-invalid]="errorMessage('priority') ? 'true' : null"
+        [attr.aria-describedby]="errorMessage('priority') ? 'task-priority-error' : null"
+      >
+        <option value="">Select a priority</option>
+        @for (option of priorities; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+      @if (errorMessage('priority'); as message) {
+        <p id="task-priority-error" class="field-error" role="alert">{{ message }}</p>
+      }
+    </div>
+
+    <div class="field">
+      <label for="task-due-date">Due date <span aria-hidden="true">*</span></label>
+      <input
+        id="task-due-date"
+        type="date"
+        formControlName="dueDate"
+        [attr.aria-invalid]="errorMessage('dueDate') ? 'true' : null"
+        [attr.aria-describedby]="errorMessage('dueDate') ? 'task-due-date-error' : null"
+      />
+      @if (errorMessage('dueDate'); as message) {
+        <p id="task-due-date-error" class="field-error" role="alert">{{ message }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="button" class="btn" (click)="cancelled.emit()">Cancel</button>
+    <button type="submit" class="btn btn--primary" [disabled]="submitting()">
+      {{ submitting() ? 'Saving…' : task() ? 'Save changes' : 'Create task' }}
+    </button>
+  </div>
+</form>

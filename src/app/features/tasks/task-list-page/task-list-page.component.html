@@ -1,0 +1,95 @@
+<section>
+  <div class="page-header">
+    <h1>Tasks</h1>
+    <a class="btn btn--primary" routerLink="/tasks/new">New task</a>
+  </div>
+
+  @if (store.loading() && !store.loaded()) {
+    <div class="state" role="status">
+      <span class="spinner" aria-hidden="true"></span>
+      Loading tasks…
+    </div>
+  } @else if (store.error()) {
+    <div class="state state--error" role="alert">
+      <p>{{ store.error() }}</p>
+      <button type="button" class="btn" (click)="store.load()">Try again</button>
+    </div>
+  } @else {
+    <app-task-summary [stats]="store.stats()" />
+
+    <app-task-filter-bar [filters]="store.filters()" (filtersChange)="onFiltersChange($event)" />
+
+    @if (store.filteredTasks().length === 0) {
+      <div class="state" data-testid="empty-state">
+        @if (store.tasks().length === 0) {
+          <h2>No tasks yet</h2>
+          <p>Create your first task to get started.</p>
+          <a class="btn btn--primary" routerLink="/tasks/new">Create task</a>
+        } @else {
+          <h2>No tasks match your filters</h2>
+          <p>Try a different search term or clear the filters.</p>
+          <button type="button" class="btn" (click)="store.clearFilters()">Clear filters</button>
+        }
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="task-table">
+          <caption class="sr-only">
+            Tasks sorted by due date
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Title</th>
+              <th scope="col">Status</th>
+              <th scope="col">Priority</th>
+              <th scope="col">Due date</th>
+              <th scope="col"><span class="sr-only">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (task of store.filteredTasks(); track task.id) {
+              <tr data-testid="task-row" [class.is-overdue]="isOverdue(task)">
+                <td>
+                  <span class="task-title">{{ task.title }}</span>
+                  @if (task.description) {
+                    <span class="task-desc">{{ task.description }}</span>
+                  }
+                </td>
+                <td>
+                  <span class="badge badge--{{ task.status }}">{{ statusLabels[task.status] }}</span>
+                </td>
+                <td>
+                  <span class="badge badge--priority-{{ task.priority }}">{{ priorityLabels[task.priority] }}</span>
+                </td>
+                <td>
+                  <span>{{ task.dueDate | date: 'mediumDate' }}</span>
+                  @if (isOverdue(task)) {
+                    <span class="badge badge--overdue" data-testid="overdue-badge">Overdue</span>
+                  }
+                </td>
+                <td class="actions">
+                  <a class="btn btn--small" [routerLink]="['/tasks', task.id, 'edit']">
+                    Edit<span class="sr-only"> {{ task.title }}</span>
+                  </a>
+                  <button type="button" class="btn btn--small btn--danger-outline" (click)="askToDelete(task)">
+                    Delete<span class="sr-only"> {{ task.title }}</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (pendingDelete(); as task) {
+    <app-confirm-dialog
+      heading="Delete this task?"
+      [message]="'“' + task.title + '” will be permanently deleted. This cannot be undone.'"
+      confirmLabel="Delete"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()"
+    />
+  }
+</section>
